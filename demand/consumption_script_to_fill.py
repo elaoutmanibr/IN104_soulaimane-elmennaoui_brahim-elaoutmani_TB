@@ -12,9 +12,16 @@ def set_wd(wd):
     os.chdir(wd)
 
 #This function imports a csv file and has the option to plot its value columns as a function of the first column
-def import_csv(f_name = "DE.csv", delimeter = ";", plot = True):
-
-    return f >> mutate(Date = pd.to_datetime(conso['Date']))
+def import_csv(f_name = "DE.csv", delimiter = ";", plot = True):
+    f = pd.read_csv(f_name,delimiter)
+    f = f >> mutate(Date = pd.to_datetime(f['Date (CET)'])) # we create another column named "Date"
+    if plot: 
+        fig, axes = plt.subplots(nrows=3, ncols=1)
+        f.plot(x='Date', y='LDZ', ax=axes[0])
+        f.plot(x='Date', y='Actual', ax=axes[1])
+        f.plot(x='Date', y='Normal', ax=axes[2])
+        plt.show()
+    return 
 
 #This function creates a scatter plot given a DataFrame and an x and y column
 def scatter_plot(dataframe = "conso", x = "Actual", y = "LDZ", col = "red"):
