@@ -21,12 +21,13 @@ def import_csv(f_name = "DE.csv", delimiter = ";", plot = True):
         df.plot(x='Date', y='Actual', ax=axes[1])
         df.plot(x='Date', y='Normal', ax=axes[2])
         plt.show()
-    return 
+    return df
 
 #This function creates a scatter plot given a DataFrame and an x and y column
-def scatter_plot(dataframe = "df", x = "Actual", y = "LDZ", col = "red"):
-    dataframe.plot.scatter(x=x,y=y,c=col)
-    #plt.show() 
+def scatter_plot(dataframe = "DE.csv",delimiter = ";", x = "Actual", y = "LDZ", col = "red"):
+    df = pd.read_csv(dataframe,sep=delimiter)
+    df.plot.scatter(x=x,y=y,c=col)
+    plt.show() 
 
 #This function is the sigmoid function for gas consumption as a function of temperature
 def h(t, a, b, c, d):
@@ -46,7 +47,7 @@ def consumption_sigmoid(t, real_conso, a = 500, b = -25, c = 2, d = 100, plot = 
                 print("Difference in length between Temperature and Real Consumption vectors")
         # add title and legend and show plot
         plt.xlabel("Temperature")
-        plt.legend(handles=[red_patch,blue_patch],labels=["","Real Consumption"])
+        #plt.legend(handles=[red_patch,blue_patch],labels=["","Real Consumption"])
         plt.show()
         
     return h_hat
@@ -80,9 +81,8 @@ class consumption:
 
     #get the sigmoid considering a temperature between -40 and 39, use the function consumption_sigmoid above
     def sigmoid(self, p):
-        l = len(p)
-        t = np.linspace(-40,39,l) # 39 is included !
-        return consumption_sigmoid(t, p)
+        t = np.linspace(-40,39,1) # 39 is included !
+        return consumption_sigmoid(t, None, plot=p)
     
     #This is what the class print if you use the print function on it
     def __str__(self):
@@ -91,8 +91,9 @@ class consumption:
 
 #The following class optimizes the parameters of the sigmoid and returns an object of class consumption
 class optimize_sigmoid:
-    #Initialize guess values that are common to all instances of the classe
+    #Initialize guess values that are common to all instances of the class
     __guess_a, __guess_b, __guess_c, __guess_d = 500, -25, 2, 100
+    #g =[500, -25, 2, 100]
 
     def __init__(self, f):
         if isinstance(f, pd.DataFrame):
@@ -106,9 +107,12 @@ class optimize_sigmoid:
     #optimize and return metrics use functions h, consumption_sigmoid defined above as well as get_fit_metrics
     def optimize(self):
         if self.__f is not None:
+            self.__f = self.__f.dropna()
             t = self.__f['Actual'].values
-            real = self.__f['LDZ'].values 
-            self.__coef, self.__cov = curve_fit(h,t,real,[__guess_a, __guess_b, __guess_c, __guess_d])
+            real = self.__f['LDZ'].values
+            g = [self.__guess_a,self.__guess_b,self.__guess_c,self.__guess_d]
+            
+            self.__coef, self.__cov = curve_fit(h,t,real,g)
             
             s = consumption_sigmoid(t, real,
              a=self.__coef[0], 
@@ -135,14 +139,7 @@ class optimize_sigmoid:
         else:
             print("optimize method is not yet run")
 
-    #This is what the class print if you use the print function on it
-    def __str__(self):
-        if self.__coef is not None:
-            t = "already optimized"
-        else:
-            t = "optimize method is not yet run"
-        return t
-
+    #This is what the class print if you use the print fun500, -25, 2, 100
 #If you have filled correctly the following code will run without an issue        
 if __name__ == '__main__':
 
@@ -151,7 +148,7 @@ if __name__ == '__main__':
 
     #1) import consumption data and plot it
     conso = import_csv()
-
+    #g = [500, -25, 2, 100]
     #2) work on consumption data (non-linear regression)
     #2)1. Plot consumption as a function of temperature    
 
