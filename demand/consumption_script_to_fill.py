@@ -14,7 +14,7 @@ def set_wd(wd):
 #This function imports a csv file and has the option to plot its value columns as a function of the first column
 def import_csv(f_name = "DE.csv", delimiter = ";", plot = True):
     df = pd.read_csv(f_name,sep=delimiter)
-    df = df >> mutate(Date = pd.to_datetime(df['Date (CET)'])) # we create another column named "Date"
+    df >>= rename(Date='Date (CET)')# we create another column named "Date"
     if plot: 
         dfig, axes = plt.subplots(nrows=3, ncols=1)
         df.plot(x='Date', y='LDZ', ax=axes[0])
@@ -81,7 +81,7 @@ class consumption:
 
     #get the sigmoid considering a temperature between -40 and 39, use the function consumption_sigmoid above
     def sigmoid(self, p):
-        t = np.linspace(-40,39,1) # 39 is included !
+        t = np.arange (-40,40,1) # 39 is included !
         return consumption_sigmoid(t, None, plot=p)
     
     #This is what the class print if you use the print function on it
