@@ -15,30 +15,30 @@ import numpy as np
 
 
 def open_sheet(filename="storage_data.xlsx"):
-    d = pd.read_excel(filename,sheet_name = None)
-    return d
+	d = pd.read_excel(filename,sheet_name = None)
+	return d
 
 
 def build_model(d): 
-    for df in d.values():
-        df['NW'] = df['withdrawal']-df['injection']
-        df['LNW'] = df['NW'].shift()
-        NWB=[]
-        for v in df['NW']:
-            if v>0:
-                NWB.append(1)
-            else: 
-                NWB.append(0)
-        df['Net Withdrawal_binary'] = NWB
+	for df in d.values():
+		df['NW'] = df['withdrawal']-df['injection']
+		df['LNW'] = df['NW'].shift()
+		NWB=[]
+		for v in df['NW']:
+			if v>0:
+				NWB.append(1)
+			else: 
+				NWB.append(0)
+		df['Net Withdrawal_binary'] = NWB
 
-        FSW1=[]
-        FSW2=[]
-        for v in df['full']:
-            FSW1.append(max(v-45,0))
-            FSW2.append(max(45-v,0))
-        df["FSW1"] = FSW1
-        df["FSW2"] = FSW2
-    return
+		FSW1=[]
+		FSW2=[]
+		for v in df['full']:
+			FSW1.append(max(v-45,0))
+			FSW2.append(max(45-v,0))
+		df["FSW1"] = FSW1
+		df["FSW2"] = FSW2
+	return
 
 
 '''
@@ -65,34 +65,59 @@ def add_FSW(d):
     return
 '''
 def import_data(filename="price_data.csv"):
-    df = pd.read_csv(filename,sep=';')
+	df = pd.read_csv(filename,sep=';')
     
     #df >>= rename(gasDayStartedOn='Date')
-    df = df >> mutate(gasDayStartedOn = pd.to_datetime(df['Date']))
-    return df
+	df = df >> mutate(gasDayStartedOn = pd.to_datetime(df['Date']))
+	return df
 
 def classification(d,price_data):
-    dic1 = {}
-    dic2 = {}
+	dic1 = {}
+	dic2 = {}
+   	#logistic regression method
+	for key,df in d.items():
+		df = df >> inner_join(price_data,by='gasDayStartedOn')
 
-    for key,df in d.items():
-        df = df >> inner_join(price_data,by='gasDayStartedOn')
+		x = df >> select(X.LNW,X.FSW1,X.FSW2,X.SAS_GPL,X.SAS_TTF)
+		y1= df['Net Withdrawal_binary'].values
+		y2=[]
+		for i in y1:
+			y2.append(i)
+		y = np.array(y2)
+		print(y)
+		x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=1)
+		lr = LogisticRegression()
+		lr.fit(x_train, y_train)
+		y_pred = lr.predict(x_test)
+		cm = confusion_matrix(y_test, y_pred)
+		probs=lr.predict_proba(x_test)
+		dic1[key] = {'recall': recall_score(y_test, y_pred),'neg_recall': cm[1,1]/(cm[0,1] + cm[1,1]),'confusion': cm,'precision': precision_score(y_test,y_pred),'neg_precision':cm[1,1]/cm.sum(axis=1)[1],'roc': roc_auc_score(y_test, probs),'class_mod': lr } 
+		#random tree method
+		model=RandomForestClassifier(n_estimators=100, bootstrap = True,max_features = 'sqrt')
+		model.fit(x_test,y_test)
+		y_pred_tree=model.predict(x_test)
+		cm_tree=confusion_matrix(y_test,y_pred_tree)
+		probs_tree=model.predict_proba(x_test)
+		dic2[key] = {'recall': recall_score(y_test, y_pred_tree), 'neg_recall': cm_tree[1,1]/(cm_tree[0,1] + cm_tree[1,1]), 'confusion': cm_tree, 'precision': mt.precision_score(Y1_test, Y1_tree_pred), 'neg_precision':cm_tree[1,1]/cm_tree.sum(axis=1)[1], 'roc': mt.roc_auc_score(Y1_test, probs_tree),'class_mod': model }
+	print(dic1)
+	print(dic2)
 
-        x = df >> select(X.LNW,X.FSW1,X.FSW2,X.SAS_GPL,X.SAS_TTF)
-        y = df['Net Withdrawal_binary']
+def  regression(d,price_data);
+	dic={}
+	for key,df1 in d.items():
+		df=df1.loc[df["NWB"]==1]
+		x = df >> select(X.LNW,X.FSW1,X.FSW2,X.SAS_GPL,X.SAS_TTF)
+		y= df['Net Withdrawal_binary'].values
+		x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=1)
+		regressor = LinearRegression()  
+		regressor.fit(X_train, y_train) #training the algorithm
+		y_pred = regressor.predict(X_test)
+		dic[key]= {'r2': metrics.r2_score(y_test, y_pred), 'rmse': rmse, 'nrmse': nrmse, 'anrmse': anrmse, 'cor': corr, 'l_reg': regressor}
+	print(dic)
 
-        x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=1)
-        lr = LogisticRegression()
-        lr.fit(x_train, y_train)
-        y_pred = lr.predict(x_test)
-        cm = confusion_matrix(y_test, y_pred)
-        dic1[key] = {'recall': recall_score(y_test, y_pred),
-                    'neg_recall': cm[1,1]/(cm[0,1] + cm[1,1]),
-                    'confusion': cm,
-                    'precision': precision_score(y_test, y_pred),
-                    'neg_precision':cm[1,1]/cm.sum(axis=1)[1],
-                    'roc': roc_auc_score(y_test, probs), #lr.probs()...
-                    'class_mod': "the logistic regression"}
+
+
+            
 
 d = open_sheet()
 build_model(d)
