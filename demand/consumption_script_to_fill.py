@@ -14,7 +14,7 @@ def set_wd(wd):
 #This function imports a csv file and has the option to plot its value columns as a function of the first column
 def import_csv(f_name = "DE.csv", delimiter = ";", plot = True):
     df = pd.read_csv(f_name,sep=delimiter)
-    df >>= rename(Date='Date (CET)')# we create another column named "Date"
+    df >>= rename(Date='Date (CET)')# we create another column named "Date" ? NO
     if plot: 
         dfig, axes = plt.subplots(nrows=3, ncols=1)
         df.plot(x='Date', y='LDZ', ax=axes[0])

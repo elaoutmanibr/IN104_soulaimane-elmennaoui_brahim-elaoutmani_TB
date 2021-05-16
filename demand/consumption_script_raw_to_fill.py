@@ -50,7 +50,7 @@ h_hat = np.empty(len())
 
     
     
-# For each value of temmperature of this column you will calculate the consumption using the h function above
+# For each value of temperature of this column you will calculate the consumption using the h function above
 # DO NOT use a for loop, vectorize
 # Use the array guess_values for the curve parameters a, b, c, d that is to say a = guess_values[0], b = guess_values[1], c = guess_values[2], d = guess_values[3]
 
