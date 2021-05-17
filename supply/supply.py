@@ -8,6 +8,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import confusion_matrix, recall_score, precision_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -77,32 +78,28 @@ def classification(d,price_data):
    	#logistic regression method
 	for key,df in d.items():
 		df = df >> inner_join(price_data,by='gasDayStartedOn')
-
+		df = df.dropna()
 		x = df >> select(X.LNW,X.FSW1,X.FSW2,X.SAS_GPL,X.SAS_TTF)
-		y1= df['Net Withdrawal_binary'].values
-		y2=[]
-		for i in y1:
-			y2.append(i)
-		y = np.array(y2)
-		print(y)
-		x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=1)
+		Y= df['Net Withdrawal_binary'].values
+		
+		x_train, x_test, y_train, y_test = train_test_split(x, Y, random_state=1)
 		lr = LogisticRegression()
 		lr.fit(x_train, y_train)
 		y_pred = lr.predict(x_test)
 		cm = confusion_matrix(y_test, y_pred)
-		probs=lr.predict_proba(x_test)
+		probs=lr.predict_proba(x_test)[:, 1]
 		dic1[key] = {'recall': recall_score(y_test, y_pred),'neg_recall': cm[1,1]/(cm[0,1] + cm[1,1]),'confusion': cm,'precision': precision_score(y_test,y_pred),'neg_precision':cm[1,1]/cm.sum(axis=1)[1],'roc': roc_auc_score(y_test, probs),'class_mod': lr } 
 		#random tree method
 		model=RandomForestClassifier(n_estimators=100, bootstrap = True,max_features = 'sqrt')
 		model.fit(x_test,y_test)
 		y_pred_tree=model.predict(x_test)
 		cm_tree=confusion_matrix(y_test,y_pred_tree)
-		probs_tree=model.predict_proba(x_test)
-		dic2[key] = {'recall': recall_score(y_test, y_pred_tree), 'neg_recall': cm_tree[1,1]/(cm_tree[0,1] + cm_tree[1,1]), 'confusion': cm_tree, 'precision': mt.precision_score(Y1_test, Y1_tree_pred), 'neg_precision':cm_tree[1,1]/cm_tree.sum(axis=1)[1], 'roc': mt.roc_auc_score(Y1_test, probs_tree),'class_mod': model }
+		probs_tree=model.predict_proba(x_test)[:, 1]
+		dic2[key] = {'recall': recall_score(y_test, y_pred_tree), 'neg_recall': cm_tree[1,1]/(cm_tree[0,1] + cm_tree[1,1]), 'confusion': cm_tree, 'precision': precision_score(y_test, y_pred_tree), 'neg_precision':cm_tree[1,1]/cm_tree.sum(axis=1)[1], 'roc': roc_auc_score(y_test, probs_tree),'class_mod': model }
 	print(dic1)
 	print(dic2)
 
-def  regression(d,price_data);
+def  regression(d,price_data):
 	dic={}
 	for key,df1 in d.items():
 		df=df1.loc[df["NWB"]==1]
