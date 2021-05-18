@@ -1,5 +1,6 @@
 
 import pandas as pd
+import pickle 	
 import os
 from dfply import *
 from scipy.optimize import curve_fit
@@ -113,7 +114,7 @@ class optimize_sigmoid:
             g = [self.__guess_a,self.__guess_b,self.__guess_c,self.__guess_d]
             
             self.__coef, self.__cov = curve_fit(h,t,real,g)
-            
+            G = [self.__coef[0],self.__coef[1],self.__coef[2],self.__coef[3]]
             s = consumption_sigmoid(t, real,
              a=self.__coef[0], 
              b=self.__coef[1],
@@ -122,6 +123,7 @@ class optimize_sigmoid:
              plot = True)
             
             self.__corr, self.__rmse, self.__nrmse, self.__anrmse = get_fit_metrics(s, self.__f['LDZ'])
+            return (G)
         else:
             print("Class not initialized")
 
@@ -147,7 +149,7 @@ if __name__ == '__main__':
     #set_wd()
 
     #1) import consumption data and plot it
-    conso = import_csv()
+    conso = import_csv(plot=False)
     #g = [500, -25, 2, 100]
     #2) work on consumption data (non-linear regression)
     #2)1. Plot consumption as a function of temperature    
@@ -156,9 +158,28 @@ if __name__ == '__main__':
 
     #2)2. optimize the parameters
     sig = optimize_sigmoid(conso)
-    sig.optimize()
+    g = sig.optimize()
     c = sig.create_consumption()
-    print(sig)
+    ##sig = optimize_sigmoid(conso)
+    #sig.optimize()
+    #c = sig.create_consumption()
+    #print(sig)
+
+L={}
+N=conso.shape
+for i in range(N[0]):
+	K=conso.loc[i,'Date']
+	A=conso.loc[i,'Actual']
+	D=h(A,g[0],g[1],g[2],g[3])
+	L[K]=D
+filename = 'Demand_model.sav'
+file='coeff.sav'
+pickle.dump(g, open(file, 'wb'))
+pickle.dump(L, open(filename, 'wb'))
+
+
+    
+
 
 
     #2)3. check the new fit
@@ -166,8 +187,7 @@ if __name__ == '__main__':
     # These are the 3 ways to access a protected attribute, it works the same for a protected method
     # An attribute/method is protected when it starts with 2 underscores "__"
     # Protection is good to not falsy create change
-    
-    print(
+print(
             [
             sig.__dict__['_optimize_sigmoid__corr'],
             sig.__dict__['_optimize_sigmoid__rmse'],
@@ -175,8 +195,7 @@ if __name__ == '__main__':
             sig.__dict__['_optimize_sigmoid__anrmse']
             ]
         )
-
-    print(
+print(
             [
             sig._optimize_sigmoid__corr,
             sig._optimize_sigmoid__rmse,
@@ -185,7 +204,7 @@ if __name__ == '__main__':
             ]
         )
 
-    print(
+print(
             [
             getattr(sig, "_optimize_sigmoid__corr"),
             getattr(sig, "_optimize_sigmoid__rmse"),
@@ -194,9 +213,11 @@ if __name__ == '__main__':
             ]
         )
     
-    print(sig.fit_metrics())
-    c.sigmoid(True)
-    print(c)
+print(sig.fit_metrics())
+c.sigmoid(True)
+print(c)
+
+
     
     #3) If time allows do TSA on actual temperature
     #3)1. Check trend (and Remove it)
