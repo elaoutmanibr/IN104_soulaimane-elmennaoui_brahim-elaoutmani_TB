@@ -14,6 +14,7 @@ from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
 import numpy as np
 
+import pickle
 
 
 def open_sheet(filename="storage_data.xlsx"):
@@ -76,6 +77,8 @@ def import_data(filename="price_data.csv"):
 def classification(d,price_data):
 	dic1 = {}
 	dic2 = {}
+	L_lr  = []
+	L_X = []
    	#logistic regression method
 	for key,df in d.items():
 		df = df >> inner_join(price_data,by='gasDayStartedOn')
@@ -89,6 +92,8 @@ def classification(d,price_data):
 		y_pred = lr.predict(x_test)
 		cm = confusion_matrix(y_test, y_pred)
 		probs=lr.predict_proba(x_test)[:, 1]
+		L_lr.append(lr)
+		L_X.append(x)
 		dic1[key] = {'recall': recall_score(y_test, y_pred),'neg_recall': cm[1,1]/(cm[0,1] + cm[1,1]),'confusion': cm,'precision': precision_score(y_test,y_pred),'neg_precision':cm[1,1]/cm.sum(axis=1)[1],'roc': roc_auc_score(y_test, probs),'class_mod': lr } 
 		#random tree method
 		model=RandomForestClassifier(n_estimators=100, bootstrap = True,max_features = 'sqrt')
@@ -97,11 +102,13 @@ def classification(d,price_data):
 		cm_tree=confusion_matrix(y_test,y_pred_tree)
 		probs_tree=model.predict_proba(x_test)[:, 1]
 		dic2[key] = {'recall': recall_score(y_test, y_pred_tree), 'neg_recall': cm_tree[1,1]/(cm_tree[0,1] + cm_tree[1,1]), 'confusion': cm_tree, 'precision': precision_score(y_test, y_pred_tree), 'neg_precision':cm_tree[1,1]/cm_tree.sum(axis=1)[1], 'roc': roc_auc_score(y_test, probs_tree),'class_mod': model }
-	print(dic1)
-	print(dic2)
+		
+	pickle.dump(L_lr, open("LogReg.sav", 'wb'))
+	pickle.dump(L_X, open("X.sav", 'wb'))
 
 def  regression(d,price_data):
 	dic={}
+	L_r = []
 	for key,df1 in d.items():
 		df1 = df1 >> inner_join(price_data,by='gasDayStartedOn')
 		df1 = df1.dropna()
@@ -112,12 +119,13 @@ def  regression(d,price_data):
 		regressor = LinearRegression()  
 		regressor.fit(x_train, y_train) #training the algorithm
 		y_pred = regressor.predict(x_test)
+		pickle.dump(L_r, open("RegMD.sav", 'wb'))
 		corr, _ = pearsonr(y_test,y_pred)
 		rmse = np.sqrt(mean_squared_error(y_test,y_pred))
 		nrmse = rmse/(np.max(y_test) - np.min(y_test))
 		anrmse = rmse/np.mean(y_test)
 		dic[key]= {'r2': r2_score(y_test, y_pred), 'rmse': rmse, 'nrmse': nrmse, 'anrmse': anrmse, 'cor': corr, 'l_reg': regressor}
-	print(dic)
+	
 
 
 

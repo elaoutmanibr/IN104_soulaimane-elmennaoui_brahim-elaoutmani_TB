@@ -203,3 +203,4 @@ if __name__ == '__main__':
     #3)2. Check Seasonality (Normal Temperature)
     #3)3. Model stochastic part that is left with ARIMA
     #3)4. Use this to forecast consumption over N days
+
