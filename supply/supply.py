@@ -83,7 +83,7 @@ def classification(d,price_data):
 	for key,df in d.items():
 		df = df >> inner_join(price_data,by='gasDayStartedOn')
 		df = df.dropna()
-		x = df >> select(X.LNW,X.FSW1,X.FSW2,X.SAS_GPL,X.SAS_TTF)
+		x = df >> select(X.LNW,X.FSW1,X.FSW2,X.SAS_GPL,X.SAS_TTF,X.SAS_NCG,X.SAS_NBP)
 		Y= df['Net Withdrawal_binary'].values
 		
 		x_train, x_test, y_train, y_test = train_test_split(x, Y, random_state=1)
