@@ -79,10 +79,13 @@ def classification(d,price_data):
 	dic2 = {}
 	L_lr  = []
 	L_X = []
+	L_date =[]
    	#logistic regression method
 	for key,df in d.items():
 		df = df >> inner_join(price_data,by='gasDayStartedOn')
 		df = df.dropna()
+		date = df['gasDayStartedOn']
+		L_date.append(date)
 		x = df >> select(X.LNW,X.FSW1,X.FSW2,X.SAS_GPL,X.SAS_TTF,X.SAS_NCG,X.SAS_NBP)
 		Y= df['Net Withdrawal_binary'].values
 		
@@ -105,6 +108,7 @@ def classification(d,price_data):
 		
 	pickle.dump(L_lr, open("LogReg.sav", 'wb'))
 	pickle.dump(L_X, open("X.sav", 'wb'))
+	pickle.dump(L_date, open("Date.sav", 'wb'))
 
 def  regression(d,price_data):
 	dic={}
@@ -113,19 +117,19 @@ def  regression(d,price_data):
 		df1 = df1 >> inner_join(price_data,by='gasDayStartedOn')
 		df1 = df1.dropna()
 		df=df1.loc[df1['Net Withdrawal_binary']==1]
-		x = df >> select(X.LNW,X.FSW1,X.FSW2,X.SAS_GPL,X.SAS_TTF)
+		x = df >> select(X.LNW,X.FSW1,X.FSW2,X.SAS_GPL,X.SAS_TTF,X.SAS_NCG,X.SAS_NBP)
 		y= df['NW'].values
 		x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=1)
 		regressor = LinearRegression()  
 		regressor.fit(x_train, y_train) #training the algorithm
 		y_pred = regressor.predict(x_test)
-		pickle.dump(L_r, open("RegMD.sav", 'wb'))
 		corr, _ = pearsonr(y_test,y_pred)
+		L_r.append(regressor)
 		rmse = np.sqrt(mean_squared_error(y_test,y_pred))
 		nrmse = rmse/(np.max(y_test) - np.min(y_test))
 		anrmse = rmse/np.mean(y_test)
 		dic[key]= {'r2': r2_score(y_test, y_pred), 'rmse': rmse, 'nrmse': nrmse, 'anrmse': anrmse, 'cor': corr, 'l_reg': regressor}
-	
+	pickle.dump(L_r, open("RegMD.sav", 'wb'))
 
 
 
@@ -134,7 +138,7 @@ def  regression(d,price_data):
 d = open_sheet()
 build_model(d)
 priceData = import_data()
-regression(d, priceData)
+classification(d, priceData)
 
 
 
