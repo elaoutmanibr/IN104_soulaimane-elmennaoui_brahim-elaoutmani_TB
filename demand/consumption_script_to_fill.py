@@ -16,6 +16,7 @@ def set_wd(wd):
 def import_csv(f_name = "DE.csv", delimiter = ";", plot = True):
     df = pd.read_csv(f_name,sep=delimiter)
     df >>= rename(Date='Date (CET)')# we create another column named "Date" ? NO
+    df >>= mutate(Date=pd.to_datetime(df['Date']))
     if plot: 
         dfig, axes = plt.subplots(nrows=3, ncols=1)
         df.plot(x='Date', y='LDZ', ax=axes[0])
@@ -166,6 +167,7 @@ if __name__ == '__main__':
     #print(sig)
 
 L={}
+print(conso)
 N=conso.shape
 for i in range(N[0]):
 	K=conso.loc[i,'Date']
@@ -174,8 +176,10 @@ for i in range(N[0]):
 	L[K]=D
 filename = 'Demand_model.sav'
 file='coeff.sav'
+df=pd.DataFrame(list(L.items()),columns=['Date', 'Demand'])
+print(df)
 pickle.dump(g, open(file, 'wb'))
-pickle.dump(L, open(filename, 'wb'))
+pickle.dump(df, open(filename, 'wb'))
 
 
     
