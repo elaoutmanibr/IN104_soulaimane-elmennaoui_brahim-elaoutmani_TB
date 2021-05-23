@@ -167,8 +167,17 @@ if __name__ == '__main__':
     #print(sig)
 
 L={}
+C={}
 print(conso)
 N=conso.shape
+for j in range(N[0]):
+	LDZ=conso.loc[j,'LDZ']
+	E=conso.loc[j,'Date']
+	C[E]=LDZ
+dff=pd.DataFrame(list(C.items()),columns=['Date', 'real_demand'])
+print(dff)
+pickle.dump(dff, open("real_d.sav", 'wb'))
+
 for i in range(N[0]):
 	K=conso.loc[i,'Date']
 	A=conso.loc[i,'Actual']
