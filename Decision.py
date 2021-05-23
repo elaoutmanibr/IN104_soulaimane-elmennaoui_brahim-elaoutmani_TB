@@ -17,3 +17,4 @@ for i in range(N[0]):
 model["decision"]=L
 print(model)
 
+model.to_csv("Final model",index=False,sep=';')
