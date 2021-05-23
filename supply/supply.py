@@ -132,17 +132,40 @@ def  regression(d,price_data):
 	pickle.dump(L_r, open("RegMD.sav", 'wb'))
 
 
+def real_conso(allStorages):
+	date = pickle.load(open("Date.sav","rb"))
+	L =[] # list of all possible dates
+	for D in date :
+		for i in D: 
+			if i not in L :
+				L.append(i)
+	
+	tab = {}
 
-            
+	for d in L:
+		supply = 0
+		for S in allStorages.values():
+			d_col = S['gasDayStartedOn'].values
+			nw_col = S['NW'].values
+			N = len(d_col)
+			for i in range(N):
+				if d_col[i] == d :
+					supply += nw_col[i]
+		
+			tab[d] = supply
+	return tab
 
 d = open_sheet()
 build_model(d)
-priceData = import_data()
-classification(d, priceData)
+#priceData = import_data()
+#classification(d, priceData)
 
+################# to get real values dataframe with date and supply
 
+r = real_conso(d)
 
-
+df = pd.DataFrame(list(r.items()),columns=['Date','real_supply'])
+pickle.dump(df, open("real_s.sav", 'wb'))
 
 
 
