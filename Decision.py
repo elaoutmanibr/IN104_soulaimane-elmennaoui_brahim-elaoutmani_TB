@@ -17,4 +17,7 @@ for i in range(N[0]):
 model["decision"]=L
 print(model)
 
-model.to_csv("Final model",index=False,sep=';')
+#model.to_csv("Final model",index=False,sep=';')
+
+real_demand = pickle.load(open("real_d.sav", 'rb'))
+real_supply = pickle.load(open("real_s.sav", 'rb'))
