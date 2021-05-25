@@ -1,0 +1,20 @@
+;SF - UGS Rehden;SF - UGS Kraak;SF - UGS Stassfurt;SF - UGS Harsefeld;SF - UGS Breitbrunn;SF - UGS Epe Uniper H-Gas;SF - UGS Eschenfelden;SF - UGS Inzenham-West;SF - UGS Bierwang;SF - UGS Jemgum H (EWE);SF - UGS Peckensen;SF - UGS Etzel ESE (Uniper Ener
+recall;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0
+neg_recall;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0
+confusion;"[[221   0]
+ [  0 180]]";"[[312   0]
+ [  0  93]]";"[[265   0]
+ [  0 140]]";"[[291   0]
+ [  0  82]]";"[[258   0]
+ [  0 147]]";"[[269   0]
+ [  0 136]]";"[[368   0]
+ [  0  37]]";"[[259   0]
+ [  0 146]]";"[[283   0]
+ [  0 122]]";"[[249   0]
+ [  0 148]]";"[[281   0]
+ [  0  92]]";"[[264   0]
+ [  0 140]]"
+precision;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0
+neg_precision;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.0
+roc;1.0;1.0;0.9999999999999999;1.0;0.9999999999999999;1.0;1.0;1.0;1.0;1.0;1.0;1.0
+class_mod;RandomForestClassifier(max_features='sqrt');RandomForestClassifier(max_features='sqrt');RandomForestClassifier(max_features='sqrt');RandomForestClassifier(max_features='sqrt');RandomForestClassifier(max_features='sqrt');RandomForestClassifier(max_features='sqrt');RandomForestClassifier(max_features='sqrt');RandomForestClassifier(max_features='sqrt');RandomForestClassifier(max_features='sqrt');RandomForestClassifier(max_features='sqrt');RandomForestClassifier(max_features='sqrt');RandomForestClassifier(max_features='sqrt')

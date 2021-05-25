@@ -22,40 +22,45 @@ regML = pickle.load(open("RegMD.sav","rb"))
 i = 0 # X and logReg have the same length
 allStorages =[]
 
-for LR in logReg:
-    x = X[i]
-    Y = LR.predict(x)
-    NW = regML[i].predict(x)
-    x['y'] = Y
-    x['NW_f'] = NW
-    x['Date'] = date[i]
-    x=x.loc[x['y']==1]
-    i += 1
-    allStorages.append(x)
+def supply_df(date_list = date, LR_list = logReg, LinR_list = regML, X_list = X):
+    i = 0 # X and logReg have the same length
+    allStorages =[]
+    for LR in LR_list:
+        x = X_list[i]
+        Y = LR.predict(x)
+        NW = LinR_list[i].predict(x)
+        x['y'] = Y
+        x['NW_f'] = NW
+        x['Date'] = date_list[i]
+        x=x.loc[x['y']==1]
+        i += 1
+        allStorages.append(x)
 
-L =[]
-for D in date :
-    for i in D: 
-        if i not in L :
-            L.append(i)
+    L =[] # list of all possible dates
+    for D in date_list :
+        for i in D: 
+            if i not in L :
+                L.append(i)
 
-tab = {}
+    tab = {}
 
-for d in L:
-    supply = 0
-    for S in allStorages:
-        d_col = S['Date'].values
-        nw_col = S['NW_f'].values
-        N = len(d_col)
-        for i in range(N):
-            if d_col[i] == d :
-                supply += nw_col[i]
-    
-    tab[d] = supply
+    for d in L:
+        supply = 0
+        for S in allStorages:
+            d_col = S['Date'].values
+            nw_col = S['NW_f'].values
+            N = len(d_col)
+            for i in range(N):
+                if d_col[i] == d :
+                    supply += nw_col[i]
+        
+        tab[d] = supply
+    df = pd.DataFrame(list(tab.items()),columns=['Date','Supply'])
+    return df
 
-df = pd.DataFrame(list(tab.items()),columns=['Date','Supply'])
-df.head()
-pickle.dump(df, open("Model_Supply.sav", 'wb'))
+S_df = supply_df()
+
+pickle.dump(S_df, open("Model_Supply.sav", 'wb'))
 
 
 

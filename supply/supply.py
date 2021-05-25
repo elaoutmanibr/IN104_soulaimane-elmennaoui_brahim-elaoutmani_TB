@@ -80,6 +80,8 @@ def classification(d,price_data):
 	L_lr  = []
 	L_X = []
 	L_date =[]
+	p1 = []
+	p2 = []
    	#logistic regression method
 	for key,df in d.items():
 		df = df >> inner_join(price_data,by='gasDayStartedOn')
@@ -97,6 +99,7 @@ def classification(d,price_data):
 		probs=lr.predict_proba(x_test)[:, 1]
 		L_lr.append(lr)
 		L_X.append(x)
+		p1.append(precision_score(y_test, y_pred))
 		dic1[key] = {'recall': recall_score(y_test, y_pred),'neg_recall': cm[1,1]/(cm[0,1] + cm[1,1]),'confusion': cm,'precision': precision_score(y_test,y_pred),'neg_precision':cm[1,1]/cm.sum(axis=1)[1],'roc': roc_auc_score(y_test, probs),'class_mod': lr } 
 		#random tree method
 		model=RandomForestClassifier(n_estimators=100, bootstrap = True,max_features = 'sqrt')
@@ -104,11 +107,15 @@ def classification(d,price_data):
 		y_pred_tree=model.predict(x_test)
 		cm_tree=confusion_matrix(y_test,y_pred_tree)
 		probs_tree=model.predict_proba(x_test)[:, 1]
+		p2.append(precision_score(y_test, y_pred_tree))
 		dic2[key] = {'recall': recall_score(y_test, y_pred_tree), 'neg_recall': cm_tree[1,1]/(cm_tree[0,1] + cm_tree[1,1]), 'confusion': cm_tree, 'precision': precision_score(y_test, y_pred_tree), 'neg_precision':cm_tree[1,1]/cm_tree.sum(axis=1)[1], 'roc': roc_auc_score(y_test, probs_tree),'class_mod': model }
-		
-	pickle.dump(L_lr, open("LogReg.sav", 'wb'))
-	pickle.dump(L_X, open("X.sav", 'wb'))
-	pickle.dump(L_date, open("Date.sav", 'wb'))
+	LR = pd.DataFrame(dic1)	
+	RF = pd.DataFrame(dic2)
+	LR.to_csv('LR_metrics.csv',sep=';')
+	RF.to_csv('RF_metrics.csv',sep=';')
+	#pickle.dump(L_lr, open("LogReg.sav", 'wb'))
+	#pickle.dump(L_X, open("X.sav", 'wb'))
+	#pickle.dump(L_date, open("Date.sav", 'wb'))
 
 def  regression(d,price_data):
 	dic={}
@@ -129,7 +136,9 @@ def  regression(d,price_data):
 		nrmse = rmse/(np.max(y_test) - np.min(y_test))
 		anrmse = rmse/np.mean(y_test)
 		dic[key]= {'r2': r2_score(y_test, y_pred), 'rmse': rmse, 'nrmse': nrmse, 'anrmse': anrmse, 'cor': corr, 'l_reg': regressor}
-	pickle.dump(L_r, open("RegMD.sav", 'wb'))
+	LinR = pd.DataFrame(dic)
+	LinR.to_csv('LinR_metrics.csv',sep=';')
+	#pickle.dump(L_r, open("RegMD.sav", 'wb'))
 
 
 def real_conso(allStorages):
@@ -157,15 +166,15 @@ def real_conso(allStorages):
 
 d = open_sheet()
 build_model(d)
-#priceData = import_data()
-#classification(d, priceData)
+priceData = import_data()
+regression(d, priceData)
 
 ################# to get real values dataframe with date and supply
 
-r = real_conso(d)
+#r = real_conso(d)
 
-df = pd.DataFrame(list(r.items()),columns=['Date','real_supply'])
-pickle.dump(df, open("real_s.sav", 'wb'))
+#df = pd.DataFrame(list(r.items()),columns=['Date','real_supply'])
+#pickle.dump(df, open("real_s.sav", 'wb'))
 
 
 
