@@ -184,10 +184,11 @@ for i in range(N[0]):
 	D=h(A,g[0],g[1],g[2],g[3])
 	L[K]=D
 filename = 'Demand_model.sav'
-file='coeff.sav'
+
 df=pd.DataFrame(list(L.items()),columns=['Date', 'Demand'])
 print(df)
-pickle.dump(g, open(file, 'wb'))
+dg=pd.DataFrame(g,columns=['Coeff'])
+dg.to_csv("coef.csv",sep=";",index=False)
 pickle.dump(df, open(filename, 'wb'))
 
 
