@@ -1,7 +1,9 @@
 import pandas as pd
 from dfply import *
 import pickle
-def  Decision(a,b,c,d):
+
+
+def  Decision(a="Demand_model.sav",b="Model_Supply.sav",c="real_d.sav",d="real_s.sav"):
 	demand_model = pickle.load(open(a, 'rb'))
 	supply_model = pickle.load(open(b, 'rb'))
 	model= demand_model >> inner_join(supply_model, by='Date')
@@ -17,7 +19,7 @@ def  Decision(a,b,c,d):
 	model["decision"]=L
 
 
-#model.to_csv("Final model",index=False,sep=';')
+	#model.to_csv("Final model",index=False,sep=';')
 
 	real_demand = pickle.load(open(c, 'rb'))
 	real_supply = pickle.load(open(d, 'rb'))
@@ -49,8 +51,5 @@ def  Decision(a,b,c,d):
 	print(a)
 	print(i)
 
-a="Demand_model.sav"
-b="Model_Supply.sav"
-c="real_d.sav"
-d="real_s.sav"
-Decision(a,b,c,d)
+
+Decision()

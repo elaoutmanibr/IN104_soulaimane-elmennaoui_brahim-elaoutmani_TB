@@ -58,6 +58,8 @@ def supply_df(date_list = date, LR_list = logReg, LinR_list = regML, X_list = X)
     df = pd.DataFrame(list(tab.items()),columns=['Date','Supply'])
     return df
 
+
+
 S_df = supply_df()
 
 pickle.dump(S_df, open("Model_Supply.sav", 'wb'))

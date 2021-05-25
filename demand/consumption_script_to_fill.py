@@ -15,13 +15,13 @@ def set_wd(wd):
 #This function imports a csv file and has the option to plot its value columns as a function of the first column
 def import_csv(f_name = "DE.csv", delimiter = ";", plot = True):
     df = pd.read_csv(f_name,sep=delimiter)
-    df >>= rename(Date='Date (CET)')# we create another column named "Date" ? NO
-    df >>= mutate(Date=pd.to_datetime(df['Date']))
+    #df >>= rename(Date='Date (CET)')# we create another column named "Date" ? NO
+    df >>= mutate(Date=pd.to_datetime(df['Date (CET)']))
     if plot: 
         dfig, axes = plt.subplots(nrows=3, ncols=1)
-        df.plot(x='Date', y='LDZ', ax=axes[0])
-        df.plot(x='Date', y='Actual', ax=axes[1])
-        df.plot(x='Date', y='Normal', ax=axes[2])
+        df.plot(x='Date (CET)', y='LDZ', ax=axes[0])
+        df.plot(x='Date (CET)', y='Actual', ax=axes[1])
+        df.plot(x='Date (CET)', y='Normal', ax=axes[2])
         plt.show()
     return df
 
@@ -142,6 +142,32 @@ class optimize_sigmoid:
         else:
             print("optimize method is not yet run")
 
+
+def demand_df(): # returns Date - Demand model dataframe
+    conso = import_csv()
+    L={}
+    C={}
+    N=conso.shape
+    for j in range(N[0]):
+        LDZ=conso.loc[j,'LDZ']
+        E=conso.loc[j,'Date']
+        C[E]=LDZ
+    dff=pd.DataFrame(list(C.items()),columns=['Date', 'real_demand'])
+    pickle.dump(dff, open("real_d.sav", 'wb'))
+
+    for i in range(N[0]):
+        K=conso.loc[i,'Date']
+        A=conso.loc[i,'Actual']
+        D=h(A,g[0],g[1],g[2],g[3])
+        L[K]=D
+
+    df=pd.DataFrame(list(L.items()),columns=['Date', 'Demand'])
+    
+    #dg=pd.DataFrame(g,columns=['Coeff'])
+    #dg.to_csv("coef.csv",sep=";",index=False)
+    
+    return df
+
     #This is what the class print if you use the print fun500, -25, 2, 100
 #If you have filled correctly the following code will run without an issue        
 if __name__ == '__main__':
@@ -150,7 +176,7 @@ if __name__ == '__main__':
     #set_wd()
 
     #1) import consumption data and plot it
-    conso = import_csv(plot=False)
+    conso = import_csv()
     #g = [500, -25, 2, 100]
     #2) work on consumption data (non-linear regression)
     #2)1. Plot consumption as a function of temperature    
@@ -166,33 +192,7 @@ if __name__ == '__main__':
     #c = sig.create_consumption()
     #print(sig)
 
-L={}
-C={}
-print(conso)
-N=conso.shape
-for j in range(N[0]):
-	LDZ=conso.loc[j,'LDZ']
-	E=conso.loc[j,'Date']
-	C[E]=LDZ
-dff=pd.DataFrame(list(C.items()),columns=['Date', 'real_demand'])
-print(dff)
-pickle.dump(dff, open("real_d.sav", 'wb'))
 
-for i in range(N[0]):
-	K=conso.loc[i,'Date']
-	A=conso.loc[i,'Actual']
-	D=h(A,g[0],g[1],g[2],g[3])
-	L[K]=D
-filename = 'Demand_model.sav'
-
-df=pd.DataFrame(list(L.items()),columns=['Date', 'Demand'])
-print(df)
-dg=pd.DataFrame(g,columns=['Coeff'])
-dg.to_csv("coef.csv",sep=";",index=False)
-pickle.dump(df, open(filename, 'wb'))
-
-
-    
 
 
 
@@ -231,7 +231,8 @@ print(sig.fit_metrics())
 c.sigmoid(True)
 print(c)
 
-
+D_df = demand_df()
+pickle.dump(D_df, open('Demand_model.sav', 'wb'))
     
     #3) If time allows do TSA on actual temperature
     #3)1. Check trend (and Remove it)
